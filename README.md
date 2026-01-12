@@ -52,7 +52,19 @@ Craftly is a handmade crafts marketplace web application built with:
 
 ---
 
-## 🚀 Quick Start (5 minutes)
+## � Running on Different Devices
+
+Want to run Craftly on your Windows PC, Mac, Linux, or access it from your phone?
+
+👉 **See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** for:
+- Step-by-step setup for Windows, Mac, Linux
+- How to access from phone/tablet on same network
+- How to deploy online (Heroku, Netlify, Railway, etc.)
+- Troubleshooting common issues
+
+---
+
+## �🚀 Quick Start (5 minutes)
 
 ### Prerequisites
 
