@@ -6,7 +6,30 @@
 
 ---
 
-## 📋 Project Overview
+## � Sharing on GitHub
+
+### Before pushing to GitHub:
+1. Update repository name and description in GitHub settings
+2. Add `.env` files (never commit secrets!) — use `.env.example` as template
+3. Run `npm install` on clean checkout to verify dependencies
+4. Check that node_modules/ and .env are in `.gitignore`
+
+### What to include:
+- ✅ `backend/`, `client/`, `cleanup_backup/` (documentation of cleanup)
+- ✅ `README.md`, `TECH_STACK.md` — setup guides
+- ✅ All source files and package.json files
+- ❌ Skip `node_modules/`, `.env`, `*.log` files (handled by .gitignore)
+
+### Quick push to GitHub:
+```bash
+git remote add origin https://github.com/YOUR_USERNAME/craftly.git
+git branch -M main
+git push -u origin main
+```
+
+---
+
+## �📋 Project Overview
 
 Craftly is a handmade crafts marketplace web application built with:
 
