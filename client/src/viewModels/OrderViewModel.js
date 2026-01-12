@@ -1,3 +1,6 @@
+// Order ViewModel
+// - Manages order-related UI state and actions (fetching user orders, creating orders).
+// - Keep network logic in `src/services/order.service.js` and auth helpers in `src/services/auth.js`.
 import { useCallback, useEffect, useState } from 'react';
 import orderService from '../services/order.service';
 import auth from '../services/auth';

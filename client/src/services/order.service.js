@@ -1,15 +1,20 @@
 import api from './api';
 
 async function createOrder(data) {
-  return api.post('/api/orders', data);
+  return api.placeOrder(data);
 }
 
 async function getMyOrders() {
-  return api.get('/api/orders');
+  if (typeof api.getMyOrders === 'function') return api.getMyOrders();
+  return api.get('/orders/my');
 }
 
 async function getSellerOrders() {
-  return api.get('/api/orders/seller');
+  return api.get('/orders/seller');
 }
 
-export default { createOrder, getMyOrders, getSellerOrders };
+async function updateOrderStatus(orderId, status) {
+  return api.put(`/orders/${orderId}/status`, { status });
+}
+
+export default { createOrder, getMyOrders, getSellerOrders, updateOrderStatus };

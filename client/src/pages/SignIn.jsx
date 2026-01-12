@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import { useAuth } from '../context/AuthContext';
+import { getCurrentUser } from '../services/auth';
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -55,6 +56,7 @@ export default function SignIn() {
     const newErrors = validateForm();
 
     if (Object.keys(newErrors).length > 0) {
+      console.warn('[SignIn] Attempted submit with validation errors:', newErrors);
       setErrors(newErrors);
       return;
     }
@@ -65,8 +67,25 @@ export default function SignIn() {
       // Login with backend
       await login(formData.email, formData.password);
 
-      // Success - redirect to buyer page
-      navigate('/buyer');
+      // Get user info and redirect based on role and permissions
+      const user = getCurrentUser();
+      const userRole = user?.role || 'buyer';
+      const isSeller = user?.isSeller || false;
+      
+      // Priority: admin > seller > buyer
+      if (userRole === 'admin') {
+        navigate('/admin');
+      } else if (userRole === 'seller' || isSeller) {
+        // If user is buyer but also has seller permissions, default to buyer
+        // They can switch to seller mode from buyer dashboard
+        if (userRole === 'buyer' && isSeller) {
+          navigate('/buyer');
+        } else {
+          navigate('/seller');
+        }
+      } else {
+        navigate('/buyer');
+      }
     } catch (err) {
       setServerError(err.message || 'Login failed');
     } finally {

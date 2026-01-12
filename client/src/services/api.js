@@ -1,6 +1,13 @@
+// API helper — central place for HTTP requests to backend.
+// - Exported functions are used by viewModels and components.
+// - To change backend target, set Vite env `VITE_API_URL` or update `API_BASE_URL`.
+// Add endpoints here so ViewModels can import from `client/src/services/api.js`.
 import authService from './auth';
 
-const API_BASE_URL = (import.meta && import.meta.env && import.meta.env.VITE_API_URL) || 'http://localhost:4004/api';
+// Resolve API base from Vite env or fallback to exact backend URL
+const API_BASE_URL = (import.meta && import.meta.env && import.meta.env.VITE_API_URL) || 'http://localhost:4002/api';
+// Log resolved API base once on module load
+try { console.log('[API] Resolved API_BASE_URL ->', API_BASE_URL); } catch (e) {}
 
 async function request(path, options = {}) {
   const url = API_BASE_URL + path;
@@ -50,24 +57,73 @@ async function put(path, body) {
   return request(path, { method: 'PUT', body });
 }
 
-async function delete_(path) {
-  return request(path, { method: 'DELETE' });
+async function delete_(path, body) {
+  return request(path, { method: 'DELETE', body });
 }
 
 async function getCrafts() {
-  return get('/api/crafts');
+  return get('/crafts');
 }
 
 async function getCart() {
-  return get('/api/cart');
+  return get('/cart');
 }
 
 async function setCart(items) {
-  return post('/api/cart', { items });
+  const res = await post('/cart', { items });
+  try { window.dispatchEvent(new CustomEvent('cart:changed', { detail: { source: 'setCart' } })); } catch (e) {}
+  return res;
+}
+
+async function addToCart(craftId, qty = 1) {
+  // primary: /cart/items POST, fallback to /cart/add
+  try {
+    const r = await post('/cart/items', { craftId, qty });
+    try { window.dispatchEvent(new CustomEvent('cart:changed', { detail: { source: 'addToCart' } })); } catch (e) {}
+    return r;
+  } catch (e) {
+    const r = await post('/cart/add', { craftId, qty });
+    try { window.dispatchEvent(new CustomEvent('cart:changed', { detail: { source: 'addToCart-fallback' } })); } catch (e) {}
+    return r;
+  }
+}
+
+async function updateCartItem(craftId, qty) {
+  // primary: /cart/items/:id PUT, fallback to /cart/update
+  try {
+    const r = await put(`/cart/items/${craftId}`, { qty });
+    try { window.dispatchEvent(new CustomEvent('cart:changed', { detail: { source: 'updateCartItem' } })); } catch (e) {}
+    return r;
+  } catch (e) {
+    const r = await put('/cart/update', { craftId, qty });
+    try { window.dispatchEvent(new CustomEvent('cart:changed', { detail: { source: 'updateCartItem-fallback' } })); } catch (e) {}
+    return r;
+  }
+}
+
+async function removeCartItem(craftId) {
+  // primary: /cart/items/:id DELETE, fallback to /cart/remove
+  try {
+    const r = await delete_(`/cart/items/${craftId}`);
+    try { window.dispatchEvent(new CustomEvent('cart:changed', { detail: { source: 'removeCartItem' } })); } catch (e) {}
+    return r;
+  } catch (e) {
+    const r = await delete_('/cart/remove', { craftId });
+    try { window.dispatchEvent(new CustomEvent('cart:changed', { detail: { source: 'removeCartItem-fallback' } })); } catch (e) {}
+    return r;
+  }
+}
+
+async function getMyOrders() {
+  return get('/orders/my');
+}
+
+async function getMyAccount() {
+  return get('/users/me');
 }
 
 async function placeOrder(data) {
-  return post('/api/orders', data);
+  return post('/orders', data);
 }
 
 async function login(email, password) {
@@ -75,15 +131,15 @@ async function login(email, password) {
 }
 
 async function createCraft(data) {
-  return post('/api/crafts', data);
+  return post('/crafts', data);
 }
 
 async function updateCraft(id, data) {
-  return put(`/api/crafts/${id}`, data);
+  return put(`/crafts/${id}`, data);
 }
 
 async function deleteCraft(id) {
-  return delete_(`/api/crafts/${id}`);
+  return delete_(`/crafts/${id}`);
 }
 
 export default {
@@ -96,5 +152,16 @@ export default {
   login,
   createCraft,
   updateCraft,
-  deleteCraft
+  deleteCraft,
+  getCart,
+  setCart,
+  addToCart,
+  updateCartItem,
+  removeCartItem,
+  // aliases requested by UI
+  updateCart: updateCartItem,
+  removeFromCart: removeCartItem,
+  getMyOrders,
+  getMyAccount,
+  placeOrder
 };

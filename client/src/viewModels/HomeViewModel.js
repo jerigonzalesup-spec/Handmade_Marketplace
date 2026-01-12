@@ -1,3 +1,6 @@
+// Home ViewModel
+// - Loads public/home data (crafts) and provides actions used by Home views.
+// - Keep network calls in `src/services/api.js` and auth in `src/services/auth.js`.
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 import authService from '../services/auth';

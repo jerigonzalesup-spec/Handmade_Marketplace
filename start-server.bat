@@ -1,4 +1,3 @@
 @echo off
-cd /d "%~dp0server"
-npm start
-pause
+REM Start-server helper: starts backend server (Windows)
+cd backend && npm run start

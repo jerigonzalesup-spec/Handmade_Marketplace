@@ -1,10 +1,3 @@
-import db from '../src/config/database.js';
+// ARCHIVED: original backend script moved to archive/archived_2026-01-08/backend_scripts/debug_user.js
+// See archive/archived_2026-01-08/backend_scripts/debug_user.js for original content.
 
-async function run() {
-  const email = process.argv[2] || 'demo@craftly.test';
-  const [rows] = await db.query('SELECT id, email, password, password_hash, name, role FROM users WHERE email = ? LIMIT 1', [email]);
-  console.log(rows[0] || null);
-  process.exit(0);
-}
-
-run().catch(e => { console.error(e); process.exit(1); });

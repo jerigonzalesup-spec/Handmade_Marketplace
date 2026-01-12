@@ -8,6 +8,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(authService.getCurrentUser());
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
+  const [offline, setOffline] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -25,9 +26,15 @@ export function AuthProvider({ children }) {
         } else {
           const data = await res.json();
           setUser(data.user || null);
+          setOffline(false);
         }
       } catch (err) {
         console.error('[AUTH] Failed to load current user', err);
+        // Detect network / backend-down situations
+        const msg = err && (err.message || '').toString();
+        if (msg.includes('Failed to fetch') || msg.includes('Network error') || err.status === 0) {
+          setOffline(true);
+        }
         setUser(null);
         setToken(null);
       } finally {
@@ -37,8 +44,8 @@ export function AuthProvider({ children }) {
     load();
   }, [token]);
 
-  const register = async (email, password, name, role) => {
-    const data = await authService.register(email, password, name, role);
+  const register = async (name, email, password, role) => {
+    const data = await authService.register(name, email, password, role);
     setToken(data.token);
     setUser(data.user);
     return data;
@@ -58,7 +65,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, register, login, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, offline, register, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

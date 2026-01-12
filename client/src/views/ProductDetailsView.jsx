@@ -4,6 +4,10 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import HomeViewModel from '../viewModels/HomeViewModel';
 
+function formatPHP(n) {
+  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(Number(n || 0));
+}
+
 export default function ProductDetailsView() {
   const { id } = useParams();
   const vm = HomeViewModel();
@@ -37,7 +41,7 @@ export default function ProductDetailsView() {
             <h1 className="text-2xl font-bold text-gray-900">{product.title}</h1>
             <p className="text-sm text-gray-600 mt-2 mb-4">{product.description || 'No description provided.'}</p>
             <div className="flex items-center gap-4">
-              <div className="text-indigo-600 font-bold text-2xl">${Number(product.price || 0).toFixed(2)}</div>
+              <div className="text-indigo-600 font-bold text-2xl">{formatPHP(product.price)}</div>
               <div className="text-sm text-gray-600">Seller: <span className="font-medium text-gray-900">{product.seller || 'Unknown'}</span></div>
             </div>
 

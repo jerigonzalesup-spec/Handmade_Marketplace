@@ -20,8 +20,15 @@ export default function Checkout() {
       try {
         const res = await api.getCart();
         if (!m) return;
+        if (!Array.isArray(res)) {
+          throw new Error('Invalid cart data received');
+        }
         setCartItems(res.map(i => ({ craft: i.craft, qty: i.qty })));
+        if (res.length === 0) {
+          setError('Your cart is empty. Please add items before checking out.');
+        }
       } catch (err) {
+        console.error('[CHECKOUT] load cart error', err);
         setError(err.message || 'Failed to load cart');
       } finally {
         setLoading(false);
@@ -37,15 +44,27 @@ export default function Checkout() {
 
   async function handlePlaceOrder(e) {
     e.preventDefault();
+    if (cartItems.length === 0) {
+      setError('Cart is empty');
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
-      const payload = { ...form };
+      const payload = {
+        fullName: form.fullName,
+        address: form.address,
+        phone: form.phone
+      };
       const order = await api.placeOrder(payload);
+      if (!order || !order.id) {
+        throw new Error('Invalid order response from server');
+      }
       navigate('/order-success', { state: { order } });
     } catch (err) {
       console.error('[CHECKOUT] place order error', err);
-      setError(err.message || 'Failed to place order');
+      const errorMsg = err.message || 'Failed to place order';
+      setError(errorMsg);
     } finally {
       setSubmitting(false);
     }

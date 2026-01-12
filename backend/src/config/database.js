@@ -1,3 +1,7 @@
+// Database pool helper
+// - Creates a MySQL connection pool used app-wide (exported as `pool`).
+// - Applies migrations (best-effort) and verifies schema on startup.
+// - To change DB settings, update environment variables or `backend/.env`.
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 
@@ -36,7 +40,54 @@ async function runMigrations() {
   }
 }
 
-// fire-and-forget
-runMigrations().catch(err => console.error('[DB] migration error', err));
+// Run migrations then verify schema
+
+// Verify required tables/columns exist to fail early with a clear message
+async function verifySchema() {
+  const required = {
+    users: ['id','email','password_hash'],
+    crafts: ['id','title','seller_id','price','stock_quantity'],
+    carts: ['id','user_id'],
+    cart_items: ['id','cart_id','craft_id','quantity'],
+    orders: ['id','user_id','total'],
+    order_items: ['id','order_id','craft_id','quantity']
+  };
+  try {
+    for (const [table, cols] of Object.entries(required)) {
+      const [rows] = await pool.query(
+        'SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?',
+        [table]
+      );
+      if (!rows || rows.length === 0) {
+        throw new Error(`Required table '${table}' is missing. Run migrations/reset script.`);
+      }
+      const existing = new Set(rows.map(r => r.COLUMN_NAME));
+      for (const c of cols) {
+        if (!existing.has(c)) {
+          throw new Error(`Table '${table}' missing column '${c}'. Run migrations/reset script.`);
+        }
+      }
+    }
+    console.log('[DB] Schema verified');
+  } catch (err) {
+    console.error('[DB] Schema verification failed:', err.message);
+    console.error('[DB] To recover: run `node backend/scripts/repair_schema.js` to add missing tables/columns (non-destructive).');
+    console.error('[DB] If you prefer full reset (destructive), run `node backend/scripts/reset_db.js` after stopping MySQL if necessary.');
+    // DON'T exit here; let requests fail with clear DB errors instead of preventing app startup
+  }
+}
+
+// Run verification after migrations
+// Note: don't block on this promise; allow the app to start and log warnings asynchronously
+(async () => {
+  try {
+    await runMigrations();
+    await verifySchema();
+  } catch (err) {
+    console.error('[DB] Critical database issue:', err?.message || err);
+    // Still exit, but allow queued events to process
+    process.exitCode = 1;
+  }
+})();
 
 export default pool;

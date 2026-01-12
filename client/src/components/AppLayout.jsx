@@ -6,7 +6,7 @@ export default function AppLayout() {
   const vm = useAuthViewModel();
 
   const user = vm.currentUser ? vm.currentUser() : null;
-  const isSeller = user && user.isSeller;
+  const isSeller = user && (user.role === 'seller' || user.isSeller);
 
   return (
     <div className="bg-gray-50">

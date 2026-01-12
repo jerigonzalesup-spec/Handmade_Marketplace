@@ -1,0 +1,69 @@
+-- Reset and recreate Craftly database and canonical schema
+DROP DATABASE IF EXISTS `craftly_db`;
+CREATE DATABASE `craftly_db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `craftly_db`;
+
+-- Recreate canonical tables (same as init.sql)
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) DEFAULT NULL,
+  password VARCHAR(255) DEFAULT NULL,
+  name VARCHAR(255) DEFAULT NULL,
+  role ENUM('buyer','seller','admin') DEFAULT 'buyer',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS crafts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  price DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  stock_quantity INT NOT NULL DEFAULT 0,
+  image VARCHAR(1024) DEFAULT NULL,
+  seller_id INT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS carts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL UNIQUE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS cart_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  cart_id INT NOT NULL,
+  craft_id INT NOT NULL,
+  quantity INT NOT NULL DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY cart_item_unique (cart_id, craft_id),
+  FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE,
+  FOREIGN KEY (craft_id) REFERENCES crafts(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS orders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  total DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  full_name VARCHAR(255) DEFAULT NULL,
+  address TEXT DEFAULT NULL,
+  phone VARCHAR(50) DEFAULT NULL,
+  status VARCHAR(50) DEFAULT 'Pending',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS order_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  order_id INT NOT NULL,
+  craft_id INT NOT NULL,
+  quantity INT NOT NULL DEFAULT 1,
+  price DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+  FOREIGN KEY (craft_id) REFERENCES crafts(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Minimal seed placeholders (insertion handled by seed script)

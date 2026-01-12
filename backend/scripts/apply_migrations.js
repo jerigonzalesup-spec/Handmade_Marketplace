@@ -1,22 +1,6 @@
-import db from '../src/config/database.js';
+// ARCHIVED: original backend script moved to archive/archived_2026-01-08/backend_scripts/apply_migrations.js
+// See archive/archived_2026-01-08/backend_scripts/apply_migrations.js for original content.
 
-async function exists(query, params) {
-  const [rows] = await db.query(query, params);
-  return rows && rows.length > 0;
-}
-
-async function columnExists(table, column) {
-  const [rows] = await db.query(
-    'SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?',
-    [table, column]
-  );
-  return rows.length > 0;
-}
-
-async function tableExists(table) {
-  const [rows] = await db.query('SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?', [table]);
-  return rows.length > 0;
-}
 
 async function run() {
   try {

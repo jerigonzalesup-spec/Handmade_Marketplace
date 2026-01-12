@@ -3,6 +3,7 @@ import cors from 'cors';
 import authRoutes from './routes/auth.routes.js';
 import craftRoutes from './routes/craft.routes.js';
 import orderRoutes from './routes/order.routes.js';
+import userRoutes from './routes/user.routes.js';
 import cartRoutes from './routes/cart.routes.js';
 import errorMiddleware from './middleware/error.middleware.js';
 
@@ -24,13 +25,17 @@ export default function createApp() {
   app.use(express.json());
 
   // Health
-  app.get('/api/health', (req, res) => res.json({ ok: true }));
+  app.get('/api/health', (req, res) => {
+    const port = Number(process.env.PORT) || 4002;
+    res.json({ status: 'ok', port });
+  });
 
   // Mount API routes
   app.use('/api/auth', authRoutes);
   app.use('/api/crafts', craftRoutes);
   app.use('/api/cart', cartRoutes);
   app.use('/api/orders', orderRoutes);
+  app.use('/api/users', userRoutes);
 
   // 404
   app.use((req, res) => res.status(404).json({ error: 'Not Found' }));

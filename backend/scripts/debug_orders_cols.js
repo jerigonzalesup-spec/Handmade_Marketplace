@@ -1,9 +1,3 @@
-import db from '../src/config/database.js';
+// ARCHIVED: original backend script moved to archive/archived_2026-01-08/backend_scripts/debug_orders_cols.js
+// See archive/archived_2026-01-08/backend_scripts/debug_orders_cols.js for original content.
 
-async function run() {
-  const [cols] = await db.query("SHOW COLUMNS FROM orders");
-  console.log(cols.map(c=>c.Field));
-  process.exit(0);
-}
-
-run().catch(e=>{ console.error(e); process.exit(1); });

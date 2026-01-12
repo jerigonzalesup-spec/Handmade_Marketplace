@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import api from '../services/api';
 import { useNavigate, useParams } from 'react-router-dom';
+import { getCurrentUser } from '../services/auth';
 
 // Sample products data
 const SAMPLE_PRODUCTS = [
@@ -77,11 +79,34 @@ export default function ProductDetails() {
     }
   };
 
+  function formatPHP(n) {
+    try {
+      return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(Number(n || 0));
+    } catch (e) {
+      return `₱${(Number(n) || 0).toFixed(2)}`;
+    }
+  }
+
   const handleAddToCart = async () => {
+    if (!product) return;
+    
+    // Check if user is authenticated
+    if (!getCurrentUser()) {
+      alert('Please sign in to add items to your cart');
+      navigate('/signin');
+      return;
+    }
+    
     setIsAddingToCart(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await api.addToCart(product.id, quantity);
+      setShowNotification(true);
+      // Emit cart changed event
+      window.dispatchEvent(new CustomEvent('cart:changed', { detail: { source: 'ProductDetails.addToCart' } }));
+      setTimeout(() => setShowNotification(false), 3000);
+    } catch (err) {
+      console.error('[PRODUCTDETAILS] addToCart error', err);
+      alert('Failed to add item to cart');
       setShowNotification(true);
       setTimeout(() => setShowNotification(false), 3000);
     } finally {
@@ -144,8 +169,8 @@ export default function ProductDetails() {
             {/* Price */}
             <div className="border-t border-b border-gray-200 py-4">
               <p className="text-4xl font-bold text-indigo-600">
-                ${product.price.toFixed(2)}
-              </p>
+                  {formatPHP(product.price)}
+                </p>
             </div>
 
             {/* Seller Info */}
@@ -242,8 +267,8 @@ export default function ProductDetails() {
             {/* Additional Info */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-900">
-                <span className="font-semibold">Free Shipping:</span> Orders over $50 qualify for free shipping
-              </p>
+                  <span className="font-semibold">Free Shipping:</span> Orders over {formatPHP(2500)} qualify for free shipping
+                </p>
             </div>
           </div>
         </div>
@@ -270,7 +295,7 @@ export default function ProductDetails() {
                       {relatedProduct.name}
                     </h3>
                     <p className="text-lg font-bold text-indigo-600">
-                      ${relatedProduct.price.toFixed(2)}
+                      {formatPHP(relatedProduct.price)}
                     </p>
                   </div>
                 </div>

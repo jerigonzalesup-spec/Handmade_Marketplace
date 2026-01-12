@@ -117,9 +117,9 @@ const MOCK_PRODUCTS = [
 const CATEGORIES = ['All', 'Home Decor', 'Fashion', 'Kitchen', 'Stationery', 'Wall Art', 'Beauty', 'Jewelry', 'Art', 'Baby'];
 const PRICE_RANGES = [
   { label: 'All Prices', min: 0, max: Infinity },
-  { label: 'Under $25', min: 0, max: 25 },
-  { label: '$25 - $50', min: 25, max: 50 },
-  { label: 'Over $50', min: 50, max: Infinity }
+  { label: 'Under ₱25', min: 0, max: 25 },
+  { label: '₱25 - ₱50', min: 25, max: 50 },
+  { label: 'Over ₱50', min: 50, max: Infinity }
 ];
 const SORT_OPTIONS = ['Newest', 'Price: Low to High', 'Price: High to Low', 'Popular'];
 
@@ -302,7 +302,7 @@ export default function MarketplaceView() {
                       </h3>
                       <p className="text-sm text-gray-500 mb-3">{product.seller}</p>
                       <div className="flex items-center justify-between">
-                        <p className="text-lg font-bold text-indigo-600">${product.price.toFixed(2)}</p>
+                        <p className="text-lg font-bold text-indigo-600">{new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(product.price)}</p>
                         <button className="text-indigo-600 hover:text-indigo-700 text-2xl">♥</button>
                       </div>
                     </div>

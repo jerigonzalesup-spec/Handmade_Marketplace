@@ -1,3 +1,6 @@
+// Auth ViewModel
+// - Responsible for auth-related view state (logout, current user checks).
+// - Keep UI logic here; call `client/src/services/auth.js` for persistence.
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import auth from '../services/auth';

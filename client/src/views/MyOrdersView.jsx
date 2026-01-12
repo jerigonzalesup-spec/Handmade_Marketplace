@@ -3,6 +3,14 @@ import React from 'react';
 import useOrderViewModel from '../viewModels/OrderViewModel';
 import Alert from '../components/Alert';
 
+function formatPHP(n) {
+  try {
+    return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(Number(n || 0));
+  } catch (e) {
+    return `₱${(Number(n) || 0).toFixed(2)}`;
+  }
+}
+
 const getStatusColor = (status) => {
   const colors = {
     'pending': '#f39c12',
@@ -42,7 +50,7 @@ export default function MyOrdersView() {
                 <div className="text-white px-3 py-1 rounded-full text-xs font-bold uppercase" style={{ background: getStatusColor(o.status) }}>{o.status}</div>
               </div>
               <div className="mt-3 border-t pt-3">
-                <div className="text-lg font-bold text-gray-800">Total: ${(o.total || 0).toFixed(2)}</div>
+                <div className="text-lg font-bold text-gray-800">Total: {formatPHP(o.total)}</div>
               </div>
             </div>
           ))}

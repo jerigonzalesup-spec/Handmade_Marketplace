@@ -45,7 +45,7 @@ export default function MyOrdersView() {
                   <div className="text-white px-3 py-1 rounded-full text-xs font-bold uppercase" style={{ background: getStatusColor(o.status) }}>{o.status}</div>
                 </div>
                 <div className="mt-4 pt-4 border-t">
-                  <div className="text-lg font-bold text-indigo-600">Total: ${(o.total || 0).toFixed(2)}</div>
+                  <div className="text-lg font-bold text-indigo-600">Total: {new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(o.total || 0)}</div>
                 </div>
               </div>
             </Card>

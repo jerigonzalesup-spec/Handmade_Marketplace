@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import api from '../services/api';
+import orderService from '../services/order.service';
 import { useNavigate } from 'react-router-dom';
 
 function formatPHP(n) {
@@ -15,7 +15,7 @@ export default function MyOrdersView() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await api.get('/api/orders');
+        const res = await orderService.getMyOrders();
         setOrders(res || []);
       } catch (err) {
         console.error('[ORDERS] load error', err);

@@ -37,19 +37,23 @@ export default function AccountView() {
   if (error) return <Alert type="error">{error}</Alert>;
   if (!user) return <div className="p-4 text-gray-500">No user data found</div>;
 
+  const isSeller = user.isSeller || user.role === 'seller';
+
   return (
     <div className="max-w-2xl mx-auto px-3 sm:px-4 py-8 sm:py-12">
       <Card padding="lg" shadow="md" className="mb-6">
-      <h2 className="text-xl sm:text-2xl font-semibold mb-6">My Account</h2>
+      <h2 className="text-xl sm:text-2xl font-semibold mb-6">
+        {isSeller ? 'Seller Dashboard' : (user.role === 'admin' ? 'Admin Panel' : 'My Account')}
+      </h2>
       
       <div className="space-y-3 mb-6 text-sm sm:text-base">
         <div><strong className="text-gray-700">Name:</strong> <span className="text-gray-600">{user.name || '—'}</span></div>
         <div><strong className="text-gray-700">Email:</strong> <span className="text-gray-600">{user.email}</span></div>
-        <div><strong className="text-gray-700">Role:</strong> <span className={`font-bold ${user.isSeller ? 'text-green-600' : 'text-gray-500'}`}>{user.isSeller ? '⭐ Seller' : 'Buyer'}</span></div>
+        <div><strong className="text-gray-700">Role:</strong> <span className={`font-bold ${isSeller ? 'text-green-600' : 'text-gray-500'}`}>{isSeller ? '⭐ Seller' : (user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Buyer')}</span></div>
       </div>
       </Card>
 
-      {!user.isSeller && (
+      {!isSeller && (
         <div className="border-t pt-6">
           <h3 className="text-lg font-medium mb-3">Become a Seller</h3>
           <p className="text-sm sm:text-base text-gray-600 mb-4">Start selling your products and reach more customers.</p>
@@ -59,7 +63,7 @@ export default function AccountView() {
         </div>
       )}
 
-      {user.isSeller && (
+      {isSeller && (
         <div className="border-t pt-6">
           <h3 className="text-lg font-medium mb-4">Seller Dashboard</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">

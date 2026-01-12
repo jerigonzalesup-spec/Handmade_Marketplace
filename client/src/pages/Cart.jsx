@@ -14,7 +14,8 @@ export default function Cart() {
 
   useEffect(() => {
     let mounted = true;
-    (async () => {
+    
+    const loadCart = async () => {
       try {
         const res = await api.getCart();
         if (!mounted) return;
@@ -31,13 +32,25 @@ export default function Cart() {
       } finally {
         setLoading(false);
       }
-    })();
-    return () => { mounted = false; };
+    };
+    
+    loadCart();
+    
+    // Listen for cart changes from other pages
+    const handleCartChange = () => {
+      loadCart();
+    };
+    window.addEventListener('cart:changed', handleCartChange);
+    
+    return () => {
+      mounted = false;
+      window.removeEventListener('cart:changed', handleCartChange);
+    };
   }, []);
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.craft?.price || 0) * item.qty, 0);
-  const shipping = subtotal > 2500 ? 0 : 150; // PHP cents assumed, keep simple
-  const tax = subtotal * 0.12; // VAT example
+  const shipping = subtotal > 2500 ? 0 : 150; // PHP threshold: 2500
+  const tax = subtotal * 0.12; // VAT example (12%)
   const total = subtotal + shipping + tax;
 
   async function persistCart(updatedItems) {
@@ -65,7 +78,7 @@ export default function Cart() {
   function updateQty(craftId, newQty) {
     const found = cartItems.find(i => i.craftId === craftId);
     if (!found) return;
-    const max = found.craft?.stock || Infinity;
+    const max = found.craft?.stock_quantity ?? found.craft?.stock ?? Infinity;
     const qty = Math.max(1, Math.min(newQty, max));
     const updated = cartItems.map(i => i.craftId === craftId ? { ...i, qty } : i);
     setCartItems(updated);
@@ -97,7 +110,11 @@ export default function Cart() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {cartItems.length === 0 ? (
+        {loading ? (
+          <div className="bg-white rounded-xl shadow-sm p-12 text-center">Loading cart...</div>
+        ) : error ? (
+          <div className="bg-white rounded-xl shadow-sm p-6 text-center text-red-600">{error}</div>
+        ) : cartItems.length === 0 ? (
           // Empty Cart State
           <div className="bg-white rounded-xl shadow-sm p-12 text-center">
             <svg
@@ -134,12 +151,7 @@ export default function Cart() {
                 </h2>
 
                 <div className="space-y-6">
-                  {loading ? (
-                    <div>Loading cart...</div>
-                  ) : error ? (
-                    <div className="text-red-600">{error}</div>
-                  ) : (
-                    cartItems.map((item) => (
+                  {cartItems.map((item) => (
                       <div
                         key={item.craftId}
                         id={`cart-item-${item.craftId}`}
@@ -179,13 +191,13 @@ export default function Cart() {
                               onClick={() => updateQty(item.craftId, item.qty + 1)}
                               id={`qty-increase-${item.craftId}`}
                               name={`qty-increase-${item.craftId}`}
-                              className={`px-2 py-1 text-gray-600 hover:text-gray-900 ${item.qty >= (item.craft?.stock || 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                              disabled={item.qty >= (item.craft?.stock || 0)}
+                              className={`px-2 py-1 text-gray-600 hover:text-gray-900 ${item.qty >= (item.craft?.stock_quantity ?? item.craft?.stock ?? 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                disabled={item.qty >= (item.craft?.stock_quantity ?? item.craft?.stock ?? 0)}
                             >
                               +
                             </button>
                           </div>
-                          {item.qty >= (item.craft?.stock || 0) && (
+                          {item.qty >= (item.craft?.stock_quantity ?? item.craft?.stock ?? 0) && (
                             <div className="text-sm text-red-600 ml-2">Stock limit reached</div>
                           )}
                         </div>
@@ -200,8 +212,7 @@ export default function Cart() {
                           Remove
                         </button>
                       </div>
-                    ))
-                  )}
+                  ))}
                 </div>
               </div>
 
@@ -224,7 +235,7 @@ export default function Cart() {
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>{formatPHP(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
@@ -232,20 +243,20 @@ export default function Cart() {
                       {shipping === 0 ? (
                         <span className="text-green-600 font-semibold">Free</span>
                       ) : (
-                        `$${shipping.toFixed(2)}`
+                        formatPHP(shipping)
                       )}
                     </span>
                   </div>
                   <div className="flex justify-between text-gray-600">
-                    <span>Tax (8%)</span>
-                    <span>${tax.toFixed(2)}</span>
+                    <span>Tax (12%)</span>
+                    <span>{formatPHP(tax)}</span>
                   </div>
                 </div>
 
                 {/* Free Shipping Note */}
                 {shipping > 0 && (
                   <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-900">
-                    Free shipping on orders over $50! Add ${(50 - subtotal).toFixed(2)} more.
+                    Free shipping on orders over {formatPHP(2500)}! Add {formatPHP(Math.max(0, 2500 - subtotal))} more.
                   </div>
                 )}
 
@@ -254,7 +265,7 @@ export default function Cart() {
                   <div className="flex justify-between items-center">
                     <span className="font-semibold text-gray-900">Total</span>
                     <span className="text-2xl font-bold text-indigo-600">
-                      ${total.toFixed(2)}
+                      {formatPHP(total)}
                     </span>
                   </div>
                 </div>

@@ -1,3 +1,6 @@
+// CreateCraft ViewModel
+// - Encapsulates form state and submission for creating a craft item.
+// - UI components should call `submit()` and observe `loading`, `error`, and `success`.
 import { useState } from 'react';
 import api from '../services/api';
 

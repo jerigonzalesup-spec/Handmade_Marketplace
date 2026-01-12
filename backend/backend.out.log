@@ -1,0 +1,4 @@
+✅ Craftly backend running on http://localhost:4002
+🔎 Process env PORT=4002
+🔌 API base: http://localhost:4002/api
+[DB] Migrations applied

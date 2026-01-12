@@ -4,11 +4,19 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
   const [imageError, setImageError] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
+  function formatPHP(n) {
+    try {
+      return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(Number(n || 0));
+    } catch (e) {
+      return `₱${(Number(n) || 0).toFixed(2)}`;
+    }
+  }
+
   const handleAddToCart = async () => {
     setIsAdding(true);
     try {
       if (onAddToCart) {
-        await onAddToCart();
+        await onAddToCart(product);
       }
     } finally {
       setIsAdding(false);
@@ -74,7 +82,7 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
         {/* Price */}
         <div className="mb-4">
           <p className="text-lg font-bold text-indigo-600">
-            ${product.price?.toFixed(2) || '0.00'}
+            {formatPHP(product.price)}
           </p>
         </div>
 

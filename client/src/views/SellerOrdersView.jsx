@@ -16,7 +16,24 @@ const getStatusColor = (status) => {
 
 export default function SellerOrdersView() {
   const vm = useSellerOrderViewModel();
-  const { orders, loading, error } = vm;
+  const { orders, loading, error, load } = vm;
+
+  const [updating, setUpdating] = React.useState(null);
+
+  const statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+
+  const handleChangeStatus = async (orderId, status) => {
+    setUpdating(orderId);
+    try {
+      await import('../services/order.service').then(m => m.default.updateOrderStatus(orderId, status));
+      await load();
+    } catch (err) {
+      console.error('[SELLER] update status error', err);
+      alert(err.message || 'Failed to update status');
+    } finally {
+      setUpdating(null);
+    }
+  };
 
   if (loading) return <div className="max-w-4xl mx-auto py-6"><div className="text-center text-gray-600">⏳ Loading your orders...</div></div>;
   if (error) return <div className="max-w-4xl mx-auto py-6"><Alert type="error">{error}</Alert></div>;
@@ -55,7 +72,13 @@ export default function SellerOrdersView() {
               </div>
               <div className="mt-3 border-t pt-3 flex justify-between items-center">
                 <div className="text-sm text-gray-500">{new Date(o.createdAt).toLocaleString()}</div>
-                <div className="text-lg font-bold text-gray-800">Total: ${(o.total || 0).toFixed(2)}</div>
+                <div className="text-lg font-bold text-gray-800">Total: {new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(o.total || 0)}</div>
+              </div>
+              <div className="mt-3 flex items-center gap-3">
+                <label className="text-sm text-gray-600">Update status:</label>
+                <select value={o.status} onChange={(e) => handleChangeStatus(o.id, e.target.value)} disabled={updating === o.id} className="px-3 py-1 border rounded">
+                  {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
               </div>
             </div>
           ))}

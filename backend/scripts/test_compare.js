@@ -1,10 +1,3 @@
-import * as User from '../src/models/user.model.js';
+// ARCHIVED: original backend script moved to archive/archived_2026-01-08/backend_scripts/test_compare.js
+// See archive/archived_2026-01-08/backend_scripts/test_compare.js for original content.
 
-async function run() {
-  const hash = '$2a$10$9gmKNySaal1IQuTK/t.ug.dIWugAIa0wBgiACcMhQrRRJ.gdhFbfO';
-  const ok = await User.comparePassword('password', hash);
-  console.log('compare result', ok);
-  process.exit(0);
-}
-
-run().catch(e => { console.error(e); process.exit(1); });

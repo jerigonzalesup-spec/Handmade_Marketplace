@@ -85,6 +85,7 @@ export default function SignUp() {
     const newErrors = validateForm();
 
     if (Object.keys(newErrors).length > 0) {
+      console.warn('[SignUp] Attempted submit with validation errors:', newErrors);
       setErrors(newErrors);
       return;
     }
@@ -92,15 +93,15 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-      // Register with backend
+      // Register with backend (name, email, password)
       await register(
+        formData.name,
         `${emailUsername}@gmail.com`,
-        formData.password,
-        formData.name
+        formData.password
       );
 
-      // Success - redirect to buyer page
-      navigate('/buyer');
+      // Success - redirect to buyer page and show welcome message
+      navigate('/buyer', { state: { newUser: true } });
     } catch (err) {
       setServerError(err.message || 'Registration failed');
     } finally {

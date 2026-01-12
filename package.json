@@ -1,18 +1,22 @@
 {
   "name": "craftly",
   "version": "1.0.0",
-  "description": "",
+  "description": "Craftly monorepo",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "concurrently -k -n backend,client -c blue,green \"npm run start --prefix backend\" \"wait-on http://localhost:4002/api/health && npm run dev --prefix client -- --strictPort\"",
+    "dev:backend": "npm run start --prefix backend",
+    "dev:client": "npm run dev --prefix client -- --strictPort"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5"
+  },
   "devDependencies": {
-    "autoprefixer": "^10.4.23",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.18"
+    "nodemon": "^3.0.3",
+    "concurrently": "^8.2.0",
+    "wait-on": "^7.0.1"
   }
 }

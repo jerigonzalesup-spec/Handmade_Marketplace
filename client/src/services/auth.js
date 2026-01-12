@@ -1,3 +1,7 @@
+// Auth service
+// - Handles token storage and simple auth-related helpers used by ViewModels and components.
+// - Keep UI-agnostic logic here; network calls should use `src/services/api.js` or `src/api/api.js`.
+// - To extend: add `refreshToken()` or role checks here and expose them to ViewModels.
 import { apiFetch } from '../api/api';
 
 const TOKEN_KEY = 'token';
@@ -47,13 +51,13 @@ export function getCurrentUser() {
   return { id: payload.id, email: payload.email };
 }
 
-export async function register(email, password, name, role = 'buyer') {
+export async function register(name, email, password, role = 'buyer') {
   try {
-    const body = { email, password, name, role };
+    const body = { name, email, password, role };
     console.log('[AUTH] Registering user:', email);
     const response = await apiFetch('/auth/register', {
       method: 'POST',
-      body: JSON.stringify(body)
+      body // apiFetch will stringify
     });
 
     const data = await response.json();
@@ -80,7 +84,7 @@ export async function login(email, password) {
     console.log('[AUTH] Logging in user:', email);
     const response = await apiFetch('/auth/login', {
       method: 'POST',
-      body: JSON.stringify(body)
+      body // apiFetch will stringify
     });
 
     const data = await response.json();

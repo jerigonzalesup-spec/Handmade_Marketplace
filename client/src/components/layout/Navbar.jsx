@@ -31,6 +31,7 @@ export default function Navbar() {
 
   const roleIsSeller = user && user.isSeller;
   const roleIsAdmin = user && (user.email?.includes('admin') || user.role === 'admin' || user.isAdmin);
+  const roleLabel = user && (user.role ? (user.role === 'buyer' ? 'Buyer' : user.role === 'seller' ? 'Seller' : user.role === 'admin' ? 'Admin' : user.role) : null);
 
   return (
     <header className="sticky top-0 z-30 bg-white shadow">
@@ -68,6 +69,7 @@ export default function Navbar() {
           {isAuth && (
             <>
               <div className="text-sm text-gray-600">{user ? (user.name || user.email) : 'User'}</div>
+              {roleLabel && <div className="text-xs text-gray-500 ml-2">Welcome, {roleLabel}</div>}
               <button onClick={vm.logout} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Logout</button>
             </>
           )}

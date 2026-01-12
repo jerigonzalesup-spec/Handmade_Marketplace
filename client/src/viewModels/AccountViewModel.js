@@ -1,5 +1,9 @@
+// Account ViewModel
+// - Responsible for loading current user info and actions like `becomeSeller` and `logout`.
+// - Keep network calls in `src/services/user.service.js` and auth helpers in `src/services/auth.js`.
 import { useCallback, useEffect, useState } from 'react';
 import userService from '../services/user.service';
+import auth from '../services/auth';
 
 export default function AccountViewModel() {
   const [user, setUser] = useState(null);
@@ -36,5 +40,15 @@ export default function AccountViewModel() {
     }
   }, []);
 
-  return { user, loading, error, load, becomeSeller };
+  const logout = useCallback(() => {
+    try {
+      auth.logout();
+    } catch (e) {
+      // noop
+    }
+    // best-effort navigate to home/signin
+    try { window.location.href = '/signin'; } catch (e) {}
+  }, []);
+
+  return { user, loading, error, load, becomeSeller, logout };
 }
