@@ -1,7 +1,8 @@
 import 'dotenv/config';
 import http from 'http';
-import createApp from './src/app.js';
-import dbPool from './src/config/database.js';
+import createApp from './app.js';
+import db  from './config/database.js';
+
 
 // Force backend to run only on port 4002 in development
 const PORT = 4002;
